@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل العمرة - جمعية الصفراء</title>
+    <style>
+        :root { --primary: #009669; --gold: #d4af37; }
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; text-align: center; }
+        .container { background: white; max-width: 450px; margin: auto; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 6px solid var(--primary); }
+        .logo { max-width: 250px; margin-bottom: 10px; }
+        .form-group { margin-bottom: 15px; text-align: initial; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold;}
+        button:disabled { background: #ccc; }
+        #closed-message { display: none; padding: 40px; color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="form-container">
+        <img src="logo.jpg" class="logo">
+        <h2 id="title">منصة تسجيل العمرة</h2>
+        <form id="umrahForm">
+            <div class="form-group"><label id="l-name">الاسم الكامل:</label><input type="text" id="name" required></div>
+            <div class="form-group"><label id="l-id">رقم الهوية / الإقامة (10 خانات):</label><input type="text" id="id_number" maxlength="10" required></div>
+            <div class="form-group"><label id="l-phone">رقم الجوال:</label><input type="tel" id="phone" required placeholder="05xxxxxxxx"></div>
+            <div class="form-group"><label id="l-nat">الجنسية:</label><input type="text" id="nationality" required></div>
+            <div id="upload-section" class="form-group" style="display:none;">
+                <label id="l-img">إرفاق صورة الهوية/الإقامة:</label><input type="file" id="file_input" accept="image/*">
+            </div>
+            <button type="submit" id="btn">تأكيد التسجيل</button>
+        </form>
+    </div>
+    <div id="closed-message"><h2 id="c-title">التسجيل مغلق حالياً</h2></div>
+</div>
+
+<script>
+    // ضع الرابط الذي نسخته بين العلامتين في السطر التالي
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxqjJ4AdF7okEsOZjcFV9VdKeTpw7o5jak4o5LIOt28OhHclddTOxvVrMwEwZoIQAL_Gg/exec'; 
+
+    const translations = {
+        'ar': { title: "منصة تسجيل العمرة", name: "الاسم الكامل:", id: "رقم الهوية:", phone: "الجوال:", nat: "الجنسية:", img: "صورة الهوية:", btn: "تأكيد التسجيل", success: "تم تسجيلك بنجاح", duplicate: "عذراً، لقد استفدت من البرنامج مسبقاً", closed: "التسجيل مغلق حالياً" },
+        'en': { title: "Umrah Registration", name: "Full Name:", id: "ID Number:", phone: "Phone:", nat: "Nationality:", img: "ID Image:", btn: "Confirm Registration", success: "Registered Successfully", duplicate: "Already Registered Previously", closed: "Registration Closed" },
+        'bn': { title: "উমরাহ নিবন্ধন", name: "নাম:", id: "আইডি নম্বর:", phone: "ফোন:", nat: "জাতীয়তা:", img: "আইডি ছবি:", btn: "নিশ্চিত করুন", success: "সফলভাবে নিবন্ধিত", duplicate: "ইতিমধ্যে নিবন্ধিত", closed: "নিবন্ধন বন্ধ" }
+    };
+
+    let userLang = navigator.language.substring(0, 2);
+    let lang = translations[userLang] ? userLang : 'ar';
+    const t = translations[lang];
+    document.body.dir = (lang === 'en') ? 'ltr' : 'rtl';
+    document.getElementById('title').innerText = t.title;
+    document.getElementById('l-name').innerText = t.name;
+    document.getElementById('l-id').innerText = t.id;
+    document.getElementById('l-phone').innerText = t.phone;
+    document.getElementById('l-nat').innerText = t.nat;
+    document.getElementById('l-img').innerText = t.img;
+    document.getElementById('btn').innerText = t.btn;
+    document.getElementById('c-title').innerText = t.closed;
+
+    fetch(scriptURL).then(res => res.json()).then(data => {
+        if(data.status === "مغلق") {
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('closed-message').style.display = 'block';
+        }
+        if(data.showUpload === "نعم") document.getElementById('upload-section').style.display = 'block';
+    });
+
+    document.getElementById('umrahForm').onsubmit = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn');
+        btn.disabled = true;
+        btn.innerText = "...";
+
+        const file = document.getElementById('file_input').files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) { sendData(e.target.result.split(',')[1], file.type, file.name); };
+            reader.readAsDataURL(file);
+        } else { sendData("", "", ""); }
+    };
+
+    function sendData(base64, type, filename) {
+        const formData = new URLSearchParams();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('id_number', document.getElementById('id_number').value);
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('nationality', document.getElementById('nationality').value);
+        formData.append('fileData', base64);
+        formData.append('mimeType', type);
+        formData.append('fileName', filename);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result === 'success') { alert(t.success); location.reload(); }
+            else if(data.result === 'duplicate') { alert(t.duplicate); btn.disabled = false; btn.innerText = t.btn; }
+            else { alert(t.closed); }
+        })
+        .catch(err => { alert("خطأ في الاتصال"); btn.disabled = false; btn.innerText = t.btn; });
+    }
+</script>
+</body>
+</html>
