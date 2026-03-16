@@ -9,18 +9,19 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
         .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 550px; border-top: 8px solid var(--primary-color); }
         .logo-container { text-align: center; margin-bottom: 20px; }
-        .logo { max-width: 100%; height: auto; max-height: 150px; border-radius: 10px; }
+        .logo { max-width: 200px; border-radius: 10px; }
         h2 { text-align: center; color: #333; line-height: 1.6; margin-top: 0; }
         .form-group { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
         .lang-sub { display: block; font-size: 13px; color: #666; font-weight: normal; line-height: 1.4; margin-bottom: 8px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border 0.3s; }
         button { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; }
         
+        /* نافذة التنبيه المخصصة */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
-        .modal-msg { font-size: 16px; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; }
-        .modal-btn { background: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100px; font-weight: bold; }
+        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-msg { font-size: 16px; color: #333; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; font-weight: 500; }
+        .modal-btn { background: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 50%; font-weight: bold; }
         
         #femaleOption { display: none; }
         #imageField { display: block; }
@@ -38,26 +39,26 @@
 
 <div class="container" id="mainContainer">
     <div class="logo-container">
-        <img src="logo.jpg" alt="Logo" class="logo" onerror="this.src='logo.jpg.jpg'">
+        <img src="logo.jpg.jpg" alt="Logo" class="logo">
     </div>
     <h2>منصة تسجيل العمرة<br><span style="font-size: 16px; color: #666;">Umrah Registration Portal</span></h2>
     <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
     <form id="registrationForm" style="display: none;">
         <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name" name="name" required></div>
-        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ نمبر | আইডি নম্বর | आईडी नंबर</span><input type="tel" id="id_number" name="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);" placeholder="2XXXXXXXXX" required></div>
-        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile Number | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX" required></div>
-        <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Date of Birth | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date" name="birth_date" required></div>
+        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ نمبر | আইডি নম্বর | আইডি نمبر</span><input type="tel" id="id_number" name="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);" placeholder="2XXXXXXXXX" required></div>
+        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile Number | موبائل نمبر | মোবাইল নম্বর | মোবাইল نمبر</span><input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX" required></div>
+        <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Date of Birth | تاریخ پیدائش | জন্ম তারিখ | জন্ম तिथि</span><input type="date" id="birth_date" name="birth_date" required></div>
         <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender" name="gender" required><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
-        <div class="form-group"><label>الجنسية</label><span class="lang-sub">Nationality | قومیت | জাতীয়تا | राष्ट्रीयता</span><input type="text" id="nationality" name="nationality" required></div>
-        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" name="id_photo" accept="image/*"></div>
+        <div class="form-group"><label>الجنسية</label><span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span><input type="text" id="nationality" name="nationality" required></div>
+        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span><input type="file" id="id_photo" name="id_photo" accept="image/*"></div>
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
 
 <script>
     // الرابط الجديد الذي زودتني به
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz_gvc1n3FnFW2Oup8QBAUB0lGSN2ay0o6Ah0MAE3SZuRW6NHqeV51UgwBMJM2khgvm/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxUF3jmmHrKWQASo4ALc1ZxIhUYq8XcG7u76IKO936-MxUwvRVzG5jTzs53FuGj-zBl/exec';
     const form = document.getElementById('registrationForm');
     const loadingSettings = document.getElementById('loadingSettings');
     const btn = document.getElementById('submitBtn');
@@ -72,11 +73,11 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
-    // جلب الإعدادات من قوقل شيت
+    // جلب الإعدادات
     fetch(scriptURL).then(res => res.json()).then(data => {
         loadingSettings.style.display = 'none';
         if (data.registration_status === "مغلق") {
-            document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration Closed</h3>";
+            document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
         } else {
             form.style.display = 'block';
             if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
@@ -85,33 +86,49 @@
                 isImageRequired = false; 
             }
         }
-    }).catch(() => {
-        loadingSettings.innerText = "خطأ في الاتصال (Check Connection)";
+    }).catch(err => {
+        loadingSettings.innerText = "خطأ في تحميل الإعدادات. يرجى التحديث.";
+        console.error('Error!', err.message);
     });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        const nameVal = document.getElementById('name').value.trim();
+        const idVal = document.getElementById('id_number').value.trim();
         const fileInput = document.getElementById('id_photo');
+
+        if (!nameVal || !idVal) {
+            showAlert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!");
+            return;
+        }
+
+        if (idVal.length !== 10) {
+            showAlert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!");
+            return;
+        }
+
         if (isImageRequired && fileInput.files.length === 0) {
             showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!");
             return;
         }
 
         btn.disabled = true;
-        btn.innerText = "Processing... (جاري الإرسال)";
+        btn.innerText = "Processing...";
 
-        const sendData = (base64 = "", type = "") => {
-            const formData = new URLSearchParams({
-                name: document.getElementById('name').value,
-                id_number: document.getElementById('id_number').value,
-                phone: document.getElementById('phone').value,
-                birth_date: document.getElementById('birth_date').value,
-                gender: document.getElementById('gender').value,
-                nationality: document.getElementById('nationality').value,
-                id_photo: base64,
-                id_photo_type: type
-            });
+        // دالة إرسال البيانات
+        const submitForm = (base64Data = "", fileName = "") => {
+            const formData = new URLSearchParams();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('id_number', document.getElementById('id_number').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('birth_date', document.getElementById('birth_date').value);
+            formData.append('gender', document.getElementById('gender').value);
+            formData.append('nationality', document.getElementById('nationality').value);
+            if (base64Data) {
+                formData.append('id_photo', base64Data);
+                formData.append('id_photo_type', fileName);
+            }
 
             fetch(scriptURL, { method: 'POST', body: formData })
                 .then(res => res.json())
@@ -123,23 +140,23 @@
                         form.reset();
                     } else if (response.result === "duplicate") {
                         showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!");
-                    } else {
-                        showAlert("⚠️ خطأ في النظام");
                     }
-                })
-                .catch(() => {
+                }).catch(err => {
+                    showAlert("❌ خطأ في الاتصال (Network Error)");
                     btn.disabled = false;
-                    btn.innerText = "تأكيد التسجيل (Submit)";
-                    showAlert("❌ فشل الإرسال (Network Error)");
                 });
         };
 
+        // معالجة الصورة إذا وجدت
         if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
             const reader = new FileReader();
-            reader.onload = (e) => sendData(e.target.result, fileInput.files[0].type);
-            reader.readAsDataURL(fileInput.files[0]);
+            reader.onload = function(e) {
+                submitForm(e.target.result, file.type);
+            };
+            reader.readAsDataURL(file);
         } else {
-            sendData();
+            submitForm();
         }
     });
 </script>
