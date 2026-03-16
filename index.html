@@ -32,38 +32,38 @@
     </div>
     <h2>منصة تسجيل العمرة<br><span style="font-size: 16px; color: #666;">Umrah Registration Portal</span></h2>
     
-    <div id="loadingSettings" class="loading-overlay">جاري تحميل الإعدادات... (Loading)</div>
+    <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
-    <form id="registrationForm" style="display: none;" novalidate>
+    <form id="registrationForm" style="display: none;">
         <div class="form-group">
             <label>الاسم الكامل</label>
             <span class="lang-sub">Full Name | نام | নাম | नाम</span>
-            <input type="text" name="name" id="field_name">
+            <input type="text" id="name" name="name">
         </div>
 
         <div class="form-group">
-            <label>رقم الهوية / الإقامة (10 أرقام فقط)</label>
-            <span class="lang-sub">ID Number | شناختی کارڈ نمبر | আইডি কার্ড নম্বর | आईडी नंबर</span>
+            <label>رقم الهوية / الإقامة (10 أرقام)</label>
+            <span class="lang-sub">ID Number | شناختی کارڈ نمبر | আইডি নম্বর | आईडी नंबर</span>
             <input type="tel" id="id_number" name="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);" placeholder="2XXXXXXXXX">
         </div>
 
         <div class="form-group">
             <label>رقم الجوال</label>
             <span class="lang-sub">Mobile Number | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span>
-            <input type="tel" name="phone" id="field_phone" placeholder="05XXXXXXXX">
+            <input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX">
         </div>
 
         <div class="form-group">
             <label>تاريخ الميلاد</label>
             <span class="lang-sub">Date of Birth | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span>
-            <input type="date" name="birth_date" id="field_birth">
+            <input type="date" id="birth_date" name="birth_date">
         </div>
 
         <div class="form-group">
             <label>الجنس</label>
             <span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span>
-            <select name="gender" id="genderSelect">
-                <option value="" selected disabled>اختر (Select)</option>
+            <select id="gender" name="gender">
+                <option value="" disabled selected>اختر (Select)</option>
                 <option value="ذكر">ذكر (Male)</option>
                 <option value="أنثى" id="femaleOption">أنثى (Female)</option>
             </select>
@@ -72,16 +72,16 @@
         <div class="form-group">
             <label>الجنسية</label>
             <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
-            <input type="text" name="nationality" id="field_nat">
+            <input type="text" id="nationality" name="nationality">
         </div>
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
             <span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span>
-            <input type="file" name="id_photo" id="id_photo_input" accept="image/*">
+            <input type="file" id="id_photo" name="id_photo" accept="image/*">
         </div>
 
-        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit Registration)</button>
+        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
 
@@ -92,16 +92,13 @@
     const btn = document.getElementById('submitBtn');
     let isImageRequired = true;
 
+    // جلب الإعدادات
     fetch(scriptURL)
         .then(response => response.json())
         .then(data => {
             loadingSettings.style.display = 'none';
             if (data.registration_status === "مغلق") {
-                document.getElementById('mainContainer').innerHTML = `
-                    <div style="text-align:center; padding: 20px;">
-                        <h2 style="color:#c0392b;">عذراً، التسجيل مغلق حالياً</h2>
-                        <p style="color:#666; line-height:1.8;">Registration Closed | رجسٹریشن بند ہے | নিবন্ধন বন্ধ | पंजीकरण बंद</p>
-                    </div>`;
+                document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>عذراً، التسجيل مغلق حالياً<br><small>Registration Closed | رجسٹریشن بند ہے</small></h3>";
             } else {
                 form.style.display = 'block';
                 if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
@@ -112,54 +109,57 @@
             }
         });
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        // 1. فحص جميع الحقول (Required Fields Check)
-        const name = document.getElementById('field_name').value;
-        const id = document.getElementById('id_number').value;
-        const phone = document.getElementById('field_phone').value;
-        const birth = document.getElementById('field_birth').value;
-        const gender = document.getElementById('genderSelect').value;
-        const nat = document.getElementById('field_nat').value;
-        const photo = document.getElementById('id_photo_input').files.length;
 
-        if (!name || !id || !phone || !birth || !gender || !nat) {
+        // سحب القيم يدوياً للتحقق
+        const nameVal = document.getElementById('name').value.trim();
+        const idVal = document.getElementById('id_number').value.trim();
+        const phoneVal = document.getElementById('phone').value.trim();
+        const birthVal = document.getElementById('birth_date').value.trim();
+        const genderVal = document.getElementById('gender').value;
+        const natVal = document.getElementById('nationality').value.trim();
+        const photoFile = document.getElementById('id_photo').files.length;
+
+        // 1. تحقق من تعبئة جميع الحقول
+        if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
             alert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!\nبراہ کرم تمام خانے پُر کریں\nসব ঘর পূরণ করুন\nकृपया सभी फ़ील्ड भरें");
-            return false;
+            return;
         }
 
-        // 2. فحص طول الهوية
-        if (id.length !== 10) {
-            alert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি সংখ্যা হতে হবে\nआईडी 10 अंक की होनी चाहिए");
-            return false;
+        // 2. تحقق من طول الهوية (10 أرقام)
+        if (idVal.length !== 10) {
+            alert("⚠️ يجب إدخال 10 أرقام للهوية!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি সংখ্যা হতে হবে\nआईडी 10 अंक की होनी चाहिए");
+            return;
         }
 
-        // 3. فحص الصورة (إذا كانت مطلوبة)
-        if (isImageRequired && photo === 0) {
-            alert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nبراہ کرم شناختی کارڈ کی تصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nकृपया आईडी फोटो अपलोड करें");
-            return false;
+        // 3. تحقق من الصورة إذا كانت مطلوبة
+        if (isImageRequired && photoFile === 0) {
+            alert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nبراہ کرم تصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nकृपया आईडी फोटो अपलोड करें");
+            return;
         }
 
-        btn.disabled = true; 
-        btn.innerText = "جاري الإرسال (Processing)...";
+        // إذا نجحت الفحوصات، ابدأ الإرسال
+        btn.disabled = true;
+        btn.innerText = "جاري الإرسال... (Processing)";
 
-        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        const formData = new FormData(this);
+        fetch(scriptURL, { method: 'POST', body: formData })
             .then(res => res.json())
-            .then(response => { 
-                btn.disabled = false; 
+            .then(response => {
+                btn.disabled = false;
                 btn.innerText = "تأكيد التسجيل (Submit)";
                 if (response.result === "success") {
-                    alert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল হয়েছে\nपंजीकरण सफल");
-                    form.reset();
+                    alert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল\nपंजीकरण सफल");
+                    this.reset();
                 } else if (response.result === "duplicate") {
-                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!\nیہ شناختی کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
+                    alert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
                 } else {
-                    alert("⚠️ حدث خطأ (Error)");
+                    alert("⚠️ خطأ في النظام (System Error)");
                 }
             })
-            .catch(err => { 
-                alert("❌ فشل الاتصال (Network Error)");
+            .catch(err => {
+                alert("❌ خطأ في الاتصال (Network Error)");
                 btn.disabled = false;
                 btn.innerText = "تأكيد التسجيل (Submit)";
             });
