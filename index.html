@@ -16,8 +16,6 @@
         .lang-sub { display: block; font-size: 13px; color: #666; font-weight: normal; line-height: 1.4; margin-bottom: 8px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border 0.3s; }
         input:focus { border-color: var(--primary-color); outline: none; }
-        /* تحسين مظهر التنبيه عند الخطأ */
-        input:invalid:focus { border-color: #e74c3c; }
         button { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: background 0.3s; }
         button:hover { background-color: #006b51; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -39,20 +37,14 @@
     <form id="registrationForm" style="display: none;">
         <div class="form-group">
             <label>الاسم الكامل</label>
-            <span class="lang-sub">Full Name | نام | নাম | नाम</span>
-            <input type="text" name="name" required placeholder="أدخل الاسم الرباعي">
+            <span class="lang-sub">Full Name | نام</span>
+            <input type="text" name="name" required>
         </div>
 
         <div class="form-group">
             <label>رقم الهوية / الإقامة (10 أرقام)</label>
-            <span class="lang-sub">ID Number (10 digits) | شناختی کارڈ (10 ہندسے)</span>
-            <input type="text" name="id_number" 
-                   required 
-                   pattern="\d{10}" 
-                   maxlength="10" 
-                   inputmode="numeric" 
-                   title="يجب إدخال 10 أرقام فقط"
-                   placeholder="2XXXXXXXXX">
+            <span class="lang-sub">ID Number (10 digits) | شناختی کارڈ</span>
+            <input type="number" id="id_number" name="id_number" required placeholder="2XXXXXXXXX">
         </div>
 
         <div class="form-group">
@@ -69,7 +61,7 @@
 
         <div class="form-group">
             <label>الجنس</label>
-            <span class="lang-sub">Gender | جنس | লিঙ্গ</span>
+            <span class="lang-sub">Gender | جنس</span>
             <select name="gender" id="genderSelect" required>
                 <option value="" disabled selected>اختر الجنس</option>
                 <option value="ذكر">ذكر (Male)</option>
@@ -80,12 +72,12 @@
         <div class="form-group">
             <label>الجنسية</label>
             <span class="lang-sub">Nationality | قومیت</span>
-            <input type="text" name="nationality" required placeholder="مثلاً: باكستاني">
+            <input type="text" name="nationality" required>
         </div>
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
-            <span class="lang-sub">ID Photo | شناختی کارڈ کی تصویر</span>
+            <span class="lang-sub">ID Photo | تصویر</span>
             <input type="file" name="id_photo" id="id_photo_input" accept="image/*" required>
         </div>
 
@@ -95,26 +87,22 @@
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyObZTvS4XJhmsYsz-15R4FB0MXUrWzGQdrGQFCA6AQMybZdSldDmJX4v-Wh7F5QYsJ/exec';
-    
     const form = document.getElementById('registrationForm');
     const loadingSettings = document.getElementById('loadingSettings');
     const btn = document.getElementById('submitBtn');
 
-    // جلب الإعدادات
     fetch(scriptURL)
         .then(response => response.json())
         .then(data => {
             loadingSettings.style.display = 'none';
             if (data.registration_status === "مغلق") {
-                document.getElementById('mainContainer').innerHTML = "<div style='text-align:center; padding: 30px;'><h2>عذراً، التسجيل مغلق حالياً</h2><p>Registration is Closed</p></div>";
+                document.getElementById('mainContainer').innerHTML = "<h2 style='text-align:center;'>التسجيل مغلق حالياً</h2>";
             } else {
                 form.style.display = 'block';
-                if (data.female_status === "مفتوح") {
-                    document.getElementById('femaleOption').style.display = 'block';
-                }
+                if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
                 if (data.image_required === "لا") {
                     document.getElementById('imageField').style.display = 'none';
-                    document.getElementById('id_photo_input').required = false; // إلغاء الإلزام إذا كانت الخانة مخفية
+                    document.getElementById('id_photo_input').required = false;
                 }
             }
         });
@@ -122,34 +110,34 @@
     form.addEventListener('submit', e => {
         e.preventDefault();
         
-        // تحقق إضافي من طول رقم الهوية برمجياً
-        const idInput = form.id_number.value;
-        if(idInput.length !== 10) {
-            alert("❌ يجب أن يتكون رقم الهوية من 10 أرقام بالضبط");
-            return;
+        // --- القفل البرمجي الجديد لرقم الهوية ---
+        const idValue = document.getElementById('id_number').value;
+        if (idValue.length !== 10) {
+            alert("⚠️ خطأ: يجب أن يتكون رقم الهوية من 10 أرقام بالضبط!\nError: ID must be exactly 10 digits.");
+            return false; // يمنع الإرسال تماماً
         }
+        // ---------------------------------------
 
         btn.disabled = true; 
-        btn.innerText = "جاري الإرسال (Processing)...";
+        btn.innerText = "جاري الإرسال...";
 
         fetch(scriptURL, { method: 'POST', body: new FormData(form)})
             .then(res => res.json())
             .then(response => { 
                 btn.disabled = false; 
-                btn.innerText = "تأكيد التسجيل (Submit)";
+                btn.innerText = "تأكيد التسجيل";
                 if (response.result === "success") {
-                    alert("✅ تم التسجيل بنجاح!\nRegistration Successful!");
+                    alert("✅ تم التسجيل بنجاح!");
                     form.reset();
                 } else if (response.result === "duplicate") {
-                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!");
+                    alert("❌ رقم الهوية مسجل مسبقاً!");
                 } else {
                     alert("⚠️ حدث خطأ، حاول مرة أخرى.");
                 }
             })
             .catch(err => { 
-                alert("❌ فشل الاتصال بالخادم");
-                btn.disabled = false; 
-                btn.innerText = "تأكيد التسجيل (Submit)";
+                alert("❌ فشل الاتصال");
+                btn.disabled = false;
             });
     });
 </script>
