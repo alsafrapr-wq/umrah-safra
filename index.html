@@ -32,7 +32,7 @@
     </div>
     <h2>منصة تسجيل العمرة<br><span style="font-size: 16px; color: #666;">Umrah Registration Portal</span></h2>
     
-    <div id="loadingSettings" class="loading-overlay">جاري تحميل الإعدادات...</div>
+    <div id="loadingSettings" class="loading-overlay">جاري تحميل الإعدادات... (Loading)</div>
 
     <form id="registrationForm" style="display: none;">
         <div class="form-group">
@@ -42,8 +42,8 @@
         </div>
 
         <div class="form-group">
-            <label>رقم الهوية / الإقامة (10 أرقام)</label>
-            <span class="lang-sub">ID Number (10 digits) | شناختی کارڈ | আইডি নম্বর | आईडी नंबर</span>
+            <label>رقم الهوية / الإقامة (10 أرقام فقط)</label>
+            <span class="lang-sub">ID Card Number | شناختی کارڈ نمبر | আইডি কার্ড নম্বর | आईडी कार्ड नंबर</span>
             <input type="tel" id="id_number" name="id_number" 
                    required 
                    maxlength="10" 
@@ -67,7 +67,7 @@
             <label>الجنس</label>
             <span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span>
             <select name="gender" id="genderSelect" required>
-                <option value="" disabled selected>اختر الجنس (Select Gender)</option>
+                <option value="" disabled selected>اختر (Select)</option>
                 <option value="ذكر">ذكر (Male)</option>
                 <option value="أنثى" id="femaleOption">أنثى (Female)</option>
             </select>
@@ -81,11 +81,11 @@
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
-            <span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span>
+            <span class="lang-sub">ID Photo | شناختی کارڈ کی تصویر | আইডি ছবি | आईडी फोटो</span>
             <input type="file" name="id_photo" id="id_photo_input" accept="image/*" required>
         </div>
 
-        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
+        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit Registration)</button>
     </form>
 </div>
 
@@ -100,7 +100,7 @@
         .then(data => {
             loadingSettings.style.display = 'none';
             if (data.registration_status === "مغلق") {
-                document.getElementById('mainContainer').innerHTML = "<h2 style='text-align:center;'>التسجيل مغلق حالياً<br><span style='font-size:18px;'>Registration is Closed</span></h2>";
+                document.getElementById('mainContainer').innerHTML = "<h2 style='text-align:center;'>التسجيل مغلق حالياً<br><span style='font-size:18px;'>Registration is Closed | رجسٹریشن بند ہے</span></h2>";
             } else {
                 form.style.display = 'block';
                 if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
@@ -116,7 +116,7 @@
         
         const idValue = document.getElementById('id_number').value;
         if (idValue.length !== 10) {
-            alert("⚠️ يجب إدخال 10 أرقام بالضبط!\nMust be exactly 10 digits!");
+            alert("⚠️ يجب إدخال 10 أرقام بالضبط!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے");
             return false;
         }
 
@@ -134,7 +134,7 @@
                 } else if (response.result === "duplicate") {
                     alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!");
                 } else {
-                    alert("⚠️ حدث خطأ (Error)");
+                    alert("⚠️ حدث خطأ (An error occurred)");
                 }
             })
             .catch(err => { 
