@@ -16,6 +16,8 @@
         .lang-sub { display: block; font-size: 13px; color: #666; font-weight: normal; line-height: 1.4; margin-bottom: 8px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: border 0.3s; }
         input:focus { border-color: var(--primary-color); outline: none; }
+        /* تحسين مظهر التنبيه عند الخطأ */
+        input:invalid:focus { border-color: #e74c3c; }
         button { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: background 0.3s; }
         button:hover { background-color: #006b51; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -38,31 +40,38 @@
         <div class="form-group">
             <label>الاسم الكامل</label>
             <span class="lang-sub">Full Name | نام | নাম | नाम</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" required placeholder="أدخل الاسم الرباعي">
         </div>
 
         <div class="form-group">
-            <label>رقم الهوية / الإقامة</label>
-            <span class="lang-sub">ID or Iqama Number | شناختی کارڈ نمبر | আইডি নম্বর | আইডি नंबर</span>
-            <input type="number" name="id_number" required>
+            <label>رقم الهوية / الإقامة (10 أرقام)</label>
+            <span class="lang-sub">ID Number (10 digits) | شناختی کارڈ (10 ہندسے)</span>
+            <input type="text" name="id_number" 
+                   required 
+                   pattern="\d{10}" 
+                   maxlength="10" 
+                   inputmode="numeric" 
+                   title="يجب إدخال 10 أرقام فقط"
+                   placeholder="2XXXXXXXXX">
         </div>
 
         <div class="form-group">
             <label>رقم الجوال</label>
-            <span class="lang-sub">Mobile Number | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span>
+            <span class="lang-sub">Mobile Number | موبائل نمبر</span>
             <input type="tel" name="phone" placeholder="05XXXXXXXX" required>
         </div>
 
         <div class="form-group">
             <label>تاريخ الميلاد</label>
-            <span class="lang-sub">Date of Birth | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span>
+            <span class="lang-sub">Date of Birth | تاریخ پیدائش</span>
             <input type="date" name="birth_date" required>
         </div>
 
         <div class="form-group">
             <label>الجنس</label>
-            <span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span>
-            <select name="gender" id="genderSelect">
+            <span class="lang-sub">Gender | جنس | লিঙ্গ</span>
+            <select name="gender" id="genderSelect" required>
+                <option value="" disabled selected>اختر الجنس</option>
                 <option value="ذكر">ذكر (Male)</option>
                 <option value="أنثى" id="femaleOption">أنثى (Female)</option>
             </select>
@@ -70,14 +79,14 @@
 
         <div class="form-group">
             <label>الجنسية</label>
-            <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
-            <input type="text" name="nationality" required>
+            <span class="lang-sub">Nationality | قومیت</span>
+            <input type="text" name="nationality" required placeholder="مثلاً: باكستاني">
         </div>
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
-            <span class="lang-sub">ID Photo | شناختی کارڈ کی تصویر | আইডি ছবি | আইডি फोटो</span>
-            <input type="file" name="id_photo" accept="image/*">
+            <span class="lang-sub">ID Photo | شناختی کارڈ کی تصویر</span>
+            <input type="file" name="id_photo" id="id_photo_input" accept="image/*" required>
         </div>
 
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
@@ -85,21 +94,19 @@
 </div>
 
 <script>
-    // الرابط الخاص بك
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyObZTvS4XJhmsYsz-15R4FB0MXUrWzGQdrGQFCA6AQMybZdSldDmJX4v-Wh7F5QYsJ/exec';
     
     const form = document.getElementById('registrationForm');
     const loadingSettings = document.getElementById('loadingSettings');
     const btn = document.getElementById('submitBtn');
 
-    // 1. جلب إعدادات التسجيل عند التحميل
+    // جلب الإعدادات
     fetch(scriptURL)
         .then(response => response.json())
         .then(data => {
             loadingSettings.style.display = 'none';
-            
             if (data.registration_status === "مغلق") {
-                document.getElementById('mainContainer').innerHTML = "<div style='text-align:center; padding: 30px;'><h2>عذراً، التسجيل مغلق حالياً</h2><p>Registration is currently Closed</p></div>";
+                document.getElementById('mainContainer').innerHTML = "<div style='text-align:center; padding: 30px;'><h2>عذراً، التسجيل مغلق حالياً</h2><p>Registration is Closed</p></div>";
             } else {
                 form.style.display = 'block';
                 if (data.female_status === "مفتوح") {
@@ -107,17 +114,21 @@
                 }
                 if (data.image_required === "لا") {
                     document.getElementById('imageField').style.display = 'none';
+                    document.getElementById('id_photo_input').required = false; // إلغاء الإلزام إذا كانت الخانة مخفية
                 }
             }
-        })
-        .catch(err => {
-            loadingSettings.innerText = "فشل تحميل الإعدادات، يرجى تحديث الصفحة.";
-            console.error('Error fetching settings:', err);
         });
 
-    // 2. معالجة الإرسال وفحص التكرار
     form.addEventListener('submit', e => {
         e.preventDefault();
+        
+        // تحقق إضافي من طول رقم الهوية برمجياً
+        const idInput = form.id_number.value;
+        if(idInput.length !== 10) {
+            alert("❌ يجب أن يتكون رقم الهوية من 10 أرقام بالضبط");
+            return;
+        }
+
         btn.disabled = true; 
         btn.innerText = "جاري الإرسال (Processing)...";
 
@@ -126,26 +137,21 @@
             .then(response => { 
                 btn.disabled = false; 
                 btn.innerText = "تأكيد التسجيل (Submit)";
-
                 if (response.result === "success") {
                     alert("✅ تم التسجيل بنجاح!\nRegistration Successful!");
                     form.reset();
                 } else if (response.result === "duplicate") {
-                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID number is already registered!");
-                } else if (response.result === "closed") {
-                    alert("🚫 عذراً، تم إغلاق التسجيل للتو.");
+                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!");
                 } else {
-                    alert("⚠️ حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.");
+                    alert("⚠️ حدث خطأ، حاول مرة أخرى.");
                 }
             })
             .catch(err => { 
-                alert("❌ فشل الاتصال بالخادم. تأكد من جودة الإنترنت.");
+                alert("❌ فشل الاتصال بالخادم");
                 btn.disabled = false; 
                 btn.innerText = "تأكيد التسجيل (Submit)";
-                console.error('Submission error:', err);
             });
     });
 </script>
-
 </body>
 </html>
