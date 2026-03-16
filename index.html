@@ -34,40 +34,36 @@
     
     <div id="loadingSettings" class="loading-overlay">جاري تحميل الإعدادات... (Loading)</div>
 
-    <form id="registrationForm" style="display: none;">
+    <form id="registrationForm" style="display: none;" novalidate>
         <div class="form-group">
             <label>الاسم الكامل</label>
             <span class="lang-sub">Full Name | نام | নাম | नाम</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="field_name">
         </div>
 
         <div class="form-group">
             <label>رقم الهوية / الإقامة (10 أرقام فقط)</label>
-            <span class="lang-sub">ID Card Number | شناختی کارڈ نمبر | আইডি কার্ড নম্বর | आईडी कार्ड नंबर</span>
-            <input type="tel" id="id_number" name="id_number" 
-                   required 
-                   maxlength="10" 
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);"
-                   placeholder="2XXXXXXXXX">
+            <span class="lang-sub">ID Number | شناختی کارڈ نمبر | আইডি কার্ড নম্বর | आईडी नंबर</span>
+            <input type="tel" id="id_number" name="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);" placeholder="2XXXXXXXXX">
         </div>
 
         <div class="form-group">
             <label>رقم الجوال</label>
             <span class="lang-sub">Mobile Number | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span>
-            <input type="tel" name="phone" placeholder="05XXXXXXXX" required>
+            <input type="tel" name="phone" id="field_phone" placeholder="05XXXXXXXX">
         </div>
 
         <div class="form-group">
             <label>تاريخ الميلاد</label>
             <span class="lang-sub">Date of Birth | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span>
-            <input type="date" name="birth_date" required>
+            <input type="date" name="birth_date" id="field_birth">
         </div>
 
         <div class="form-group">
             <label>الجنس</label>
             <span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span>
-            <select name="gender" id="genderSelect" required>
-                <option value="" disabled selected>اختر (Select)</option>
+            <select name="gender" id="genderSelect">
+                <option value="" selected disabled>اختر (Select)</option>
                 <option value="ذكر">ذكر (Male)</option>
                 <option value="أنثى" id="femaleOption">أنثى (Female)</option>
             </select>
@@ -76,13 +72,13 @@
         <div class="form-group">
             <label>الجنسية</label>
             <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
-            <input type="text" name="nationality" required>
+            <input type="text" name="nationality" id="field_nat">
         </div>
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
-            <span class="lang-sub">ID Photo | شناختی کارڈ کی تصویر | আইডি ছবি | आईडी फोटो</span>
-            <input type="file" name="id_photo" id="id_photo_input" accept="image/*" required>
+            <span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span>
+            <input type="file" name="id_photo" id="id_photo_input" accept="image/*">
         </div>
 
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit Registration)</button>
@@ -94,19 +90,24 @@
     const form = document.getElementById('registrationForm');
     const loadingSettings = document.getElementById('loadingSettings');
     const btn = document.getElementById('submitBtn');
+    let isImageRequired = true;
 
     fetch(scriptURL)
         .then(response => response.json())
         .then(data => {
             loadingSettings.style.display = 'none';
             if (data.registration_status === "مغلق") {
-                document.getElementById('mainContainer').innerHTML = "<h2 style='text-align:center;'>التسجيل مغلق حالياً<br><span style='font-size:18px;'>Registration is Closed | رجسٹریشن بند ہے</span></h2>";
+                document.getElementById('mainContainer').innerHTML = `
+                    <div style="text-align:center; padding: 20px;">
+                        <h2 style="color:#c0392b;">عذراً، التسجيل مغلق حالياً</h2>
+                        <p style="color:#666; line-height:1.8;">Registration Closed | رجسٹریشن بند ہے | নিবন্ধন বন্ধ | पंजीकरण बंद</p>
+                    </div>`;
             } else {
                 form.style.display = 'block';
                 if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
                 if (data.image_required === "لا") {
                     document.getElementById('imageField').style.display = 'none';
-                    document.getElementById('id_photo_input').required = false;
+                    isImageRequired = false;
                 }
             }
         });
@@ -114,9 +115,29 @@
     form.addEventListener('submit', e => {
         e.preventDefault();
         
-        const idValue = document.getElementById('id_number').value;
-        if (idValue.length !== 10) {
-            alert("⚠️ يجب إدخال 10 أرقام بالضبط!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے");
+        // 1. فحص جميع الحقول (Required Fields Check)
+        const name = document.getElementById('field_name').value;
+        const id = document.getElementById('id_number').value;
+        const phone = document.getElementById('field_phone').value;
+        const birth = document.getElementById('field_birth').value;
+        const gender = document.getElementById('genderSelect').value;
+        const nat = document.getElementById('field_nat').value;
+        const photo = document.getElementById('id_photo_input').files.length;
+
+        if (!name || !id || !phone || !birth || !gender || !nat) {
+            alert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!\nبراہ کرم تمام خانے پُر کریں\nসব ঘর পূরণ করুন\nकृपया सभी फ़ील्ड भरें");
+            return false;
+        }
+
+        // 2. فحص طول الهوية
+        if (id.length !== 10) {
+            alert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি সংখ্যা হতে হবে\nआईडी 10 अंक की होनी चाहिए");
+            return false;
+        }
+
+        // 3. فحص الصورة (إذا كانت مطلوبة)
+        if (isImageRequired && photo === 0) {
+            alert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nبراہ کرم شناختی کارڈ کی تصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nकृपया आईडी फोटो अपलोड करें");
             return false;
         }
 
@@ -129,12 +150,12 @@
                 btn.disabled = false; 
                 btn.innerText = "تأكيد التسجيل (Submit)";
                 if (response.result === "success") {
-                    alert("✅ تم التسجيل بنجاح!\nRegistration Successful!");
+                    alert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল হয়েছে\nपंजीकरण सफल");
                     form.reset();
                 } else if (response.result === "duplicate") {
-                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!");
+                    alert("❌ رقم الهوية مسجل مسبقاً!\nThis ID is already registered!\nیہ شناختی کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
                 } else {
-                    alert("⚠️ حدث خطأ (An error occurred)");
+                    alert("⚠️ حدث خطأ (Error)");
                 }
             })
             .catch(err => { 
