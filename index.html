@@ -42,9 +42,13 @@
         </div>
 
         <div class="form-group">
-            <label>رقم الهوية / الإقامة (10 أرقام)</label>
-            <span class="lang-sub">ID Number (10 digits) | شناختی کارڈ</span>
-            <input type="number" id="id_number" name="id_number" required placeholder="2XXXXXXXXX">
+            <label>رقم الهوية / الإقامة (10 أرقام فقط)</label>
+            <span class="lang-sub">ID Number (Must be 10 digits)</span>
+            <input type="tel" id="id_number" name="id_number" 
+                   required 
+                   maxlength="10" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);"
+                   placeholder="2XXXXXXXXX">
         </div>
 
         <div class="form-group">
@@ -110,13 +114,13 @@
     form.addEventListener('submit', e => {
         e.preventDefault();
         
-        // --- القفل البرمجي الجديد لرقم الهوية ---
+        // --- القفل الحاسم: فحص عدد الأرقام قبل الإرسال ---
         const idValue = document.getElementById('id_number').value;
         if (idValue.length !== 10) {
-            alert("⚠️ خطأ: يجب أن يتكون رقم الهوية من 10 أرقام بالضبط!\nError: ID must be exactly 10 digits.");
-            return false; // يمنع الإرسال تماماً
+            alert("⚠️ يجب إدخال 10 أرقام بالضبط لرقم الهوية!\nYour ID must be exactly 10 digits.");
+            document.getElementById('id_number').focus();
+            return false;
         }
-        // ---------------------------------------
 
         btn.disabled = true; 
         btn.innerText = "جاري الإرسال...";
@@ -132,12 +136,13 @@
                 } else if (response.result === "duplicate") {
                     alert("❌ رقم الهوية مسجل مسبقاً!");
                 } else {
-                    alert("⚠️ حدث خطأ، حاول مرة أخرى.");
+                    alert("⚠️ حدث خطأ في النظام.");
                 }
             })
             .catch(err => { 
-                alert("❌ فشل الاتصال");
+                alert("❌ فشل الاتصال بالسيرفر");
                 btn.disabled = false;
+                btn.innerText = "تأكيد التسجيل";
             });
     });
 </script>
