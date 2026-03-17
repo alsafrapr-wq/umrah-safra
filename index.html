@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل العمرة - Umrah Registration</title>
+    <title>منصة التسجيل في العمرة - Umrah Registration Portal</title>
     <style>
         :root { --primary-color: #008967; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
@@ -17,7 +17,7 @@
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         
-        /* نافذة التنبيه المخصصة بزر OK */
+        /* نافذة التنبيه المخصصة */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-msg { font-size: 16px; color: #333; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; font-weight: 500; }
@@ -45,18 +45,19 @@
     <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
     <form id="registrationForm" style="display: none;">
-        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name"></div>
-        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | আইডি নম্বর | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
-        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
-        <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | জন্ম तिथि</span><input type="date" id="birth_date"></div>
-        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
-        <div class="form-group"><label>الجنسية</label><span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span><input type="text" id="nationality"></div>
+        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name" required></div>
+        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | আইডি নম্বর | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required></div>
+        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX" required></div>
+        <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date" required></div>
+        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender" required><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
+        <div class="form-group"><label>الجنسية</label><span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span><input type="text" id="nationality" required></div>
         <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
 
 <script>
+    // الرابط الأخير الذي قدمته
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxUF3jmmHrKWQASo4ALc1ZxIhUYq8XcG7u76IKO936-MxUwvRVzG5jTzs53FuGj-zBl/exec';
     const form = document.getElementById('registrationForm');
     const loadingSettings = document.getElementById('loadingSettings');
@@ -72,7 +73,7 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
-    // جلب الإعدادات من الشيت
+    // جلب الإعدادات
     fetch(scriptURL).then(res => res.json()).then(data => {
         loadingSettings.style.display = 'none';
         if (data.registration_status === "مغلق") {
@@ -80,7 +81,10 @@
         } else {
             form.style.display = 'block';
             if (data.female_status === "مفتوح") document.getElementById('femaleOption').style.display = 'block';
-            if (data.image_required === "لا") { document.getElementById('imageField').style.display = 'none'; isImageRequired = false; }
+            if (data.image_required === "لا") { 
+                document.getElementById('imageField').style.display = 'none'; 
+                isImageRequired = false; 
+            }
         }
     }).catch(() => {
         loadingSettings.innerText = "Error loading settings. Please refresh.";
@@ -99,7 +103,7 @@
 
         // 1. تنبيه الحقول الفارغة باللغات الخمس
         if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
-            showAlert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!\nبراہ کرم تمام خانه پُر کریں\nসব ঘর পূরণ করুন\nकृपया सभी फ़ील्ड भरें");
+            showAlert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!\nبراہ کرم تمام خانہ پُر کریں\nসব ঘর পূরণ করুন\nकृपया सभी फ़ील्ड भरें");
             return;
         }
 
@@ -118,7 +122,7 @@
         btn.disabled = true;
         btn.innerText = "Processing... (جاري الإرسال)";
 
-        const sendRequest = (base64 = "", type = "") => {
+        const sendData = (base64 = "", type = "") => {
             const body = new URLSearchParams({
                 name: nameVal,
                 id_number: idVal,
@@ -151,10 +155,10 @@
 
         if (fileInput.files.length > 0) {
             const reader = new FileReader();
-            reader.onload = (e) => sendRequest(e.target.result, fileInput.files[0].type);
+            reader.onload = (e) => sendData(e.target.result, fileInput.files[0].type);
             reader.readAsDataURL(fileInput.files[0]);
         } else {
-            sendRequest();
+            sendData();
         }
     });
 </script>
