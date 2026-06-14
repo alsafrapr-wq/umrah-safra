@@ -70,13 +70,12 @@
     function showAlert(msg) {
         document.getElementById('alertMessage').innerText = msg;
         document.getElementById('customAlert').style.display = 'flex';
-    </div>
+    }
 
     function closeAlert() {
         document.getElementById('customAlert').style.display = 'none';
-    </div>
+    }
 
-    // جلب الإعدادات والتحكم من شيت Settings
     fetch(scriptURL).then(res => res.json()).then(data => {
         document.getElementById('loadingSettings').style.display = 'none';
         
@@ -91,18 +90,18 @@
                 document.getElementById('femaleOption').style.display = 'none';
             }
             
-            if (data.image_required === "لا" || data.image_required === "No") { 
-                document.getElementById('imageField').style.display = 'none'; 
-                isImageRequired = false; 
-            } else {
-                document.getElementById('imageField').style.display = 'block';
-                isImageRequired = true;
+            if (data.image_required === "لا" || data.image_required === "No" || data.image_required === "نعم") { 
+                if(data.image_required === "لا" || data.image_required === "No") {
+                    document.getElementById('imageField').style.display = 'none'; 
+                    isImageRequired = false; 
+                } else {
+                    document.getElementById('imageField').style.display = 'block';
+                    isImageRequired = true;
+                }
             }
 
-            // توليد قائمة الجنسيات ديناميكياً بناءً على مدخلات الشيت اليدوية
             const natSelect = document.getElementById('nationality');
             if (data.allowed_nationalities && data.allowed_nationalities.trim() !== "") {
-                // تقسيم النص المدخل في الشيت عن طريق الفاصلة
                 const nationalitiesList = data.allowed_nationalities.split(',');
                 
                 nationalitiesList.forEach(nat => {
@@ -115,7 +114,6 @@
                     }
                 });
             } else {
-                // في حال كانت الخانة فارغة في الشيت كاحتياط
                 const option = document.createElement('option');
                 option.value = "Other";
                 option.innerText = "Other";
@@ -148,7 +146,7 @@
         }
 
         if (isImageRequired && fileInput.files.length === 0) {
-            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nআইडी फोटो अपलोड करें");
+            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nआईडी फोटो अपलोड करें");
             return;
         }
 
@@ -177,7 +175,7 @@
                         showAlert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল\nपंजीकरण सफल");
                         form.reset();
                     } else if (response.result === "duplicate") {
-                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
+                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধيت\nयह आईडी पहले से पंजीकृत है");
                     }
                 })
                 .catch(() => {
