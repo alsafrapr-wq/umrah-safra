@@ -44,7 +44,159 @@
 
     <form id="registrationForm" style="display: none;" novalidate>
         <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name"></div>
-        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی دي نمبر | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
         <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
         <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date"></div>
-        <div class="form-group"><label>الجنس</label
+        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
+        
+        <div class="form-group">
+            <label>الجنسية</label>
+            <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
+            <select id="nationality">
+                <option value="" disabled selected>Select Nationality</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
+        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
+    </form>
+</div>
+
+<script>
+    // تم دمج رابط السكربت الجديد الخاص بك هنا في السطر 66 بدقة
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwQVkrxXQwvvexr6FcMSK64QE2pWPCZPByPNl_jMQTGYs-BWKrtOaubDP1cQP2a_kvd/exec';
+    const form = document.getElementById('registrationForm');
+    let isImageRequired = true;
+
+    function showAlert(msg) {
+        document.getElementById('alertMessage').innerText = msg;
+        document.getElementById('customAlert').style.display = 'flex';
+    </div>
+
+    function closeAlert() {
+        document.getElementById('customAlert').style.display = 'none';
+    }
+
+    fetch(scriptURL).then(res => res.json()).then(data => {
+        document.getElementById('loadingSettings').style.display = 'none';
+        
+        if (data.registration_status === "مغلق" || data.Registration_Status === "مغلق") {
+            document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
+            return;
+        }
+        
+        form.style.display = 'block';
+        
+        if (data.female_status === "مفتوح" || data.Female_Status === "مفتوح") {
+            document.getElementById('femaleOption').style.display = 'block';
+        } else {
+            document.getElementById('femaleOption').style.display = 'none';
+        }
+        
+        if (data.image_required === "لا" || data.Image_Required === "لا" || data.image_required === "No") { 
+            document.getElementById('imageField').style.display = 'none'; 
+            isImageRequired = false; 
+        } else {
+            document.getElementById('imageField').style.display = 'block';
+            isImageRequired = true;
+        }
+
+        const natSelect = document.getElementById('nationality');
+        const rawNationalities = data.allowed_nationalities || data.Allowed_Nationalities || data.allowed_nationality;
+        
+        if (rawNationalities && rawNationalities.trim() !== "") {
+            const nationalitiesList = rawNationalities.split(',');
+            nationalitiesList.forEach(nat => {
+                const cleanNat = nat.trim();
+                if(cleanNat !== "") {
+                    const option = document.createElement('option');
+                    option.value = cleanNat;
+                    option.innerText = cleanNat;
+                    natSelect.appendChild(option);
+                }
+            });
+        } else {
+            const backupList = ["Yemeni", "Egyptian", "Pakistani"];
+            backupList.forEach(nat => {
+                const option = document.createElement('option');
+                option.value = nat;
+                option.innerText = nat;
+                natSelect.appendChild(option);
+            });
+        }
+    }).catch(() => {
+        document.getElementById('loadingSettings').innerText = "خطأ في تحميل الإعدادات. يرجى التحديث.";
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nameVal = document.getElementById('name').value.trim();
+        const idVal = document.getElementById('id_number').value.trim();
+        const phoneVal = document.getElementById('phone').value.trim();
+        const birthVal = document.getElementById('birth_date').value.trim();
+        const genderVal = document.getElementById('gender').value;
+        const natVal = document.getElementById('nationality').value;
+        const fileInput = document.getElementById('id_photo');
+
+        if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
+            showAlert("⚠️ يرجى تعبئة جميع الحقول!\nPlease fill all fields!\nبراہ کرم تمام خانہ پُر کریں\nসব ঘর পূরণ করুন\nकृपया सभी फ़ील्ड भरें");
+            return;
+        }
+
+        if (idVal.length !== 10) {
+            showAlert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি সংখ্যা হতে হবে\nআইডি 10 अंक की होनी चाहिए");
+            return;
+        }
+
+        if (isImageRequired && fileInput.files.length === 0) {
+            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nআইডি फोटो अपलोड करें");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const sendData = (base64 = "", type = "") => {
+            const body = new URLSearchParams({
+                name: nameVal,
+                id_number: idVal,
+                phone: phoneVal,
+                birth_date: birthVal,
+                gender: genderVal,
+                nationality: natVal,
+                id_photo: base64,
+                id_photo_type: type
+            });
+
+            fetch(scriptURL, { method: 'POST', body: body })
+                .then(res => res.json())
+                .then(response => {
+                    btn.disabled = false;
+                    btn.innerText = "تأكيد التسجيل (Submit)";
+                    if (response.result === "success") {
+                        showAlert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল\nपंजीकरण सफल");
+                        form.reset();
+                    } else if (response.result === "duplicate") {
+                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = "تأكيد التسجيل (Submit)";
+                    showAlert("❌ خطأ في الاتصال (Network Error)");
+                });
+        };
+
+        if (fileInput.files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = (ev) => sendData(ev.target.result, fileInput.files[0].type);
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            sendData();
+        }
+    });
+</script>
+</body>
+</html>
