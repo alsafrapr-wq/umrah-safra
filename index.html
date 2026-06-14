@@ -44,18 +44,25 @@
 
     <form id="registrationForm" style="display: none;" novalidate>
         <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name"></div>
-        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | আইডি নম্বর | আইডি নম্বর</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
-        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | মোবাইল نمبر</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
+        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+        <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
         <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date"></div>
-        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিنگ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
-        <div class="form-group"><label>الجنسية</label><span class="lang-sub">Nationality | قومیت | জাতীয়تا | राष्ट्रीयता</span><input type="text" id="nationality"></div>
-        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
+        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
+        
+        <div class="form-group">
+            <label>الجنسية</label>
+            <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
+            <select id="nationality">
+                <option value="" disabled selected>Select Nationality</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
 
 <script>
-    // الرابط الجديد الذي زودتني به
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxaCW9XfblzR_B2Xnt5uE9Vc6P_qP7BI-rnLlMXh30KLbzblNhI1-I3QdfBa9wfhZJS/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
@@ -63,36 +70,56 @@
     function showAlert(msg) {
         document.getElementById('alertMessage').innerText = msg;
         document.getElementById('customAlert').style.display = 'flex';
-    }
+    </div>
 
     function closeAlert() {
         document.getElementById('customAlert').style.display = 'none';
-    }
+    </div>
 
     // جلب الإعدادات والتحكم من شيت Settings
     fetch(scriptURL).then(res => res.json()).then(data => {
         document.getElementById('loadingSettings').style.display = 'none';
         
-        // 1. التحكم في حالة التسجيل
         if (data.registration_status === "مغلق") {
             document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
         } else {
             form.style.display = 'block';
             
-            // 2. التحكم في خيار النساء
             if (data.female_status === "مفتوح") {
                 document.getElementById('femaleOption').style.display = 'block';
             } else {
                 document.getElementById('femaleOption').style.display = 'none';
             }
             
-            // 3. التحكم في خانة الصورة
-            if (data.image_required === "لا") { 
+            if (data.image_required === "لا" || data.image_required === "No") { 
                 document.getElementById('imageField').style.display = 'none'; 
                 isImageRequired = false; 
             } else {
                 document.getElementById('imageField').style.display = 'block';
                 isImageRequired = true;
+            }
+
+            // توليد قائمة الجنسيات ديناميكياً بناءً على مدخلات الشيت اليدوية
+            const natSelect = document.getElementById('nationality');
+            if (data.allowed_nationalities && data.allowed_nationalities.trim() !== "") {
+                // تقسيم النص المدخل في الشيت عن طريق الفاصلة
+                const nationalitiesList = data.allowed_nationalities.split(',');
+                
+                nationalitiesList.forEach(nat => {
+                    const cleanNat = nat.trim();
+                    if(cleanNat !== "") {
+                        const option = document.createElement('option');
+                        option.value = cleanNat;
+                        option.innerText = cleanNat;
+                        natSelect.appendChild(option);
+                    }
+                });
+            } else {
+                // في حال كانت الخانة فارغة في الشيت كاحتياط
+                const option = document.createElement('option');
+                option.value = "Other";
+                option.innerText = "Other";
+                natSelect.appendChild(option);
             }
         }
     }).catch(() => {
@@ -107,7 +134,7 @@
         const phoneVal = document.getElementById('phone').value.trim();
         const birthVal = document.getElementById('birth_date').value.trim();
         const genderVal = document.getElementById('gender').value;
-        const natVal = document.getElementById('nationality').value.trim();
+        const natVal = document.getElementById('nationality').value;
         const fileInput = document.getElementById('id_photo');
 
         if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
@@ -116,7 +143,7 @@
         }
 
         if (idVal.length !== 10) {
-            showAlert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি संख्या হতে হবে\nआईडी 10 अंक की होनी चाहिए");
+            showAlert("⚠️ رقم الهوية يجب أن يكون 10 أرقام!\nID must be 10 digits!\nشناختی کارڈ 10 ہندسوں کا ہونا چاہیے\nআইডি 10টি সংখ্যা হতে হবে\nआईडी 10 अंक की होनी चाहिए");
             return;
         }
 
