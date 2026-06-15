@@ -63,10 +63,10 @@
 </div>
 
 <script>
-    // تم إدخال رابط الـ السكريبت الجديد الخاص بك هنا بدقة في السطر 66
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzjwoiIbWUtteINEK59JFQi6dPIN_OFSj97C0byaLdIal3vMJCSZ_DiBiMmInQbnXN7/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
+    let isLoaded = false;
 
     function showAlert(msg) {
         document.getElementById('alertMessage').innerText = msg;
@@ -77,7 +77,36 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
+    // دالة لتوليد الجنسيات الاحتياطية فورا وتخطي التعليق
+    function loadBackupSettings() {
+        if (isLoaded) return;
+        isLoaded = true;
+        document.getElementById('loadingSettings').style.display = 'none';
+        form.style.display = 'block';
+        document.getElementById('femaleOption').style.display = 'block';
+        document.getElementById('imageField').style.display = 'block';
+
+        const natSelect = document.getElementById('nationality');
+        const backupList = ["Yemeni", "Egyptian", "Pakistani"];
+        natSelect.innerHTML = '<option value="" disabled selected>Select Nationality</option>';
+        backupList.forEach(nat => {
+            const option = document.createElement('option');
+            option.value = nat;
+            option.innerText = nat;
+            natSelect.appendChild(option);
+        });
+    }
+
+    // مؤقت ذكي: إذا علق الاتصال لأكثر من 3 ثوانٍ، يتم تشغيل النظام الاحتياطي فوراً وفك التعليق
+    const fallbackTimeout = setTimeout(() => {
+        loadBackupSettings();
+    }, 3000);
+
     fetch(scriptURL).then(res => res.json()).then(data => {
+        if (isLoaded) return;
+        clearTimeout(fallbackTimeout);
+        isLoaded = true;
+        
         document.getElementById('loadingSettings').style.display = 'none';
         
         if (data.registration_status === "مغلق" || data.Registration_Status === "مغلق") {
@@ -106,6 +135,7 @@
         
         if (rawNationalities && rawNationalities.trim() !== "") {
             const nationalitiesList = rawNationalities.split(',');
+            natSelect.innerHTML = '<option value="" disabled selected>Select Nationality</option>';
             nationalitiesList.forEach(nat => {
                 const cleanNat = nat.trim();
                 if(cleanNat !== "") {
@@ -116,16 +146,10 @@
                 }
             });
         } else {
-            const backupList = ["Yemeni", "Egyptian", "Pakistani"];
-            backupList.forEach(nat => {
-                const option = document.createElement('option');
-                option.value = nat;
-                option.innerText = nat;
-                natSelect.appendChild(option);
-            });
+            loadBackupSettings();
         }
     }).catch(() => {
-        document.getElementById('loadingSettings').innerText = "خطأ في تحميل الإعدادات. يرجى التحديث.";
+        loadBackupSettings();
     });
 
     form.addEventListener('submit', function(e) {
@@ -150,7 +174,7 @@
         }
 
         if (isImageRequired && fileInput.files.length === 0) {
-            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nआईडी फोटो अपलोड करें");
+            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nআইডি फोटो अपलोड करें");
             return;
         }
 
@@ -179,7 +203,7 @@
                         showAlert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল\nपंजीकरण सफल");
                         form.reset();
                     } else if (response.result === "duplicate") {
-                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
+                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধيت\nयह आईडी पहले से पंजीकृत है");
                     }
                 })
                 .catch(() => {
