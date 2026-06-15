@@ -47,23 +47,24 @@
         <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | आई डी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
         <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
         <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date"></div>
-        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
+        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | ლიঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
         
         <div class="form-group">
             <label>الجنسية</label>
-            <span class="lang-sub">Nationality | قومیت | জাতীয়та | राष्ट्रीयता</span>
+            <span class="lang-sub">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
             <select id="nationality">
                 <option value="" disabled selected>Select Nationality</option>
             </select>
         </div>
 
-        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
+        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxXWsJ_Z4xfx5OC2RMb6Q5TuQt9Mu6B8UtMUXev2cvg8Wu6niGe9xmN6Vuf3yVM6kcP/exec';
+    // تم وضع رابط النشر الجديد الخاص بك هنا في السطر 66 تلقائياً
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzFwnTB1B2uuGlNxXG86THVhlAk6BAA8u3NIRsflKYXmwi5YXpcX9pOCRJn8NbWowYf/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
 
@@ -76,18 +77,12 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
-    // طريقة جلب متطورة ومقاومة للحظر ولإعادة التوجيه (Anti-Blocking Fetch)
+    // جلب البيانات بطريقة متوافقة ومباشرة بدون تعليق
     fetch(scriptURL)
-    .then(res => {
-        if (res.redirected) {
-            return fetch(res.url).then(r => r.json());
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
         document.getElementById('loadingSettings').style.display = 'none';
         
-        // التحقق المرن من حالة التسجيل
         const regStatus = data.Registration_Status || data.registration_status || "";
         if (regStatus === "مغلق") {
             document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
@@ -96,7 +91,6 @@
         
         form.style.display = 'block';
         
-        // التحكم في خيار النساء
         const femaleStatus = data.Female_Status || data.female_status || "";
         if (femaleStatus === "مفتوح") {
             document.getElementById('femaleOption').style.display = 'block';
@@ -104,7 +98,6 @@
             document.getElementById('femaleOption').style.display = 'none';
         }
         
-        // التحكم في حقل الصورة
         const imgRequired = data.Image_Required || data.image_required || "";
         if (imgRequired === "لا" || imgRequired === "No") { 
             document.getElementById('imageField').style.display = 'none'; 
@@ -114,7 +107,6 @@
             isImageRequired = true;
         }
 
-        // بناء قائمة الجنسيات ديناميكياً من الشيت
         const natSelect = document.getElementById('nationality');
         const rawNationalities = data.allowed_nationalities || data.Allowed_Nationalities || data.allowed_nationality;
         
@@ -132,19 +124,7 @@
         }
     }).catch((err) => {
         console.error(err);
-        // نظام احتياطي فوري لتشغيل الموقع حتى لو حدث خطأ مفاجئ في السيرفر
-        document.getElementById('loadingSettings').style.display = 'none';
-        form.style.display = 'block';
-        document.getElementById('femaleOption').style.display = 'block';
-        document.getElementById('imageField').style.display = 'block';
-        const natSelect = document.getElementById('nationality');
-        const backupList = ["Yemeni", "Egyptian", "Pakistani"];
-        backupList.forEach(nat => {
-            const option = document.createElement('option');
-            option.value = nat;
-            option.innerText = nat;
-            natSelect.appendChild(option);
-        });
+        document.getElementById('loadingSettings').innerText = "خطأ في الاتصال بالسيرفر، جاري المحاولة...";
     });
 
     form.addEventListener('submit', function(e) {
@@ -190,12 +170,7 @@
             });
 
             fetch(scriptURL, { method: 'POST', body: body })
-                .then(res => {
-                    if (res.redirected) {
-                        return fetch(res.url).then(r => r.json());
-                    }
-                    return res.json();
-                })
+                .then(res => res.json())
                 .then(response => {
                     btn.disabled = false;
                     btn.innerText = "تأكيد التسجيل (Submit)";
