@@ -43,11 +43,11 @@
     <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
     <form id="registrationForm" style="display: none;" novalidate>
-        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name"></div>
-        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | نام | نام</span><input type="text" id="name"></div>
+        <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | آئی ڈی نمبر</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
         <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
         <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date"></div>
-        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | ლიঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
+        <div class="form-group"><label>الجنس</label><span class="lang-sub">Gender | جنس | লিঙ্গ | लिंग</span><select id="gender"><option value="" disabled selected>اختر (Select)</option><option value="ذكر">ذكر (Male)</option><option value="أنثى" id="femaleOption">أنثى (Female)</option></select></div>
         
         <div class="form-group">
             <label>الجنسية</label>
@@ -63,7 +63,6 @@
 </div>
 
 <script>
-    // تم تحديث الرابط الجديد الخاص بك هنا بدقة في السطر 66
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxXWsJ_Z4xfx5OC2RMb6Q5TuQt9Mu6B8UtMUXev2cvg8Wu6niGe9xmN6Vuf3yVM6kcP/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
@@ -71,13 +70,12 @@
     function showAlert(msg) {
         document.getElementById('alertMessage').innerText = msg;
         document.getElementById('customAlert').style.display = 'flex';
-    }
+    </div>
 
     function closeAlert() {
         document.getElementById('customAlert').style.display = 'none';
     }
 
-    // جلب البيانات مع توجيه برمي متوافق تماماً مع حماية جوجل وسيرفرات GitHub
     fetch(scriptURL, { method: 'GET', redirect: 'follow' })
     .then(res => {
         if (!res.ok) throw new Error('Network error');
@@ -86,20 +84,24 @@
     .then(data => {
         document.getElementById('loadingSettings').style.display = 'none';
         
-        if (data.registration_status === "مغلق" || data.Registration_Status === "مغلق") {
+        // معالجة ذكية لقراءة حالة الإغلاق والفتح بغض النظر عن حالة الأحرف الكبيرة أو الصغيرة
+        const regStatus = data.Registration_Status || data.registration_status || "";
+        if (regStatus === "مغلق") {
             document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
             return;
         }
         
         form.style.display = 'block';
         
-        if (data.female_status === "مفتوح" || data.Female_Status === "مفتوح") {
+        const femaleStatus = data.Female_Status || data.female_status || "";
+        if (femaleStatus === "مفتوح") {
             document.getElementById('femaleOption').style.display = 'block';
         } else {
             document.getElementById('femaleOption').style.display = 'none';
         }
         
-        if (data.image_required === "لا" || data.Image_Required === "لا" || data.image_required === "No") { 
+        const imgRequired = data.Image_Required || data.image_required || "";
+        if (imgRequired === "لا" || imgRequired === "No") { 
             document.getElementById('imageField').style.display = 'none'; 
             isImageRequired = false; 
         } else {
@@ -121,18 +123,10 @@
                     natSelect.appendChild(option);
                 }
             });
-        } else {
-            const backupList = ["Yemeni", "Egyptian", "Pakistani"];
-            backupList.forEach(nat => {
-                const option = document.createElement('option');
-                option.value = nat;
-                option.innerText = nat;
-                natSelect.appendChild(option);
-            });
         }
     }).catch((err) => {
         console.error(err);
-        document.getElementById('loadingSettings').innerText = "خطأ في الاتصال بالجدول أو جاري معالجة البيانات...";
+        document.getElementById('loadingSettings').innerText = "خطأ في الاتصال بالجدول...";
     });
 
     form.addEventListener('submit', function(e) {
