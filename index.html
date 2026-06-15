@@ -22,8 +22,8 @@
         .modal-msg { font-size: 16px; color: #333; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; font-weight: 500; }
         .modal-btn { background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
         
-        #femaleOption { display: none; }
-        .loading-overlay { text-align: center; padding: 20px; color: var(--primary-color); font-weight: bold; }
+        #femaleOption { display: block; }
+        .loading-overlay { display: none; }
     </style>
 </head>
 <body>
@@ -40,10 +40,9 @@
         <img src="logo.jpg" alt="Logo" class="logo" onerror="this.src='logo.jpg.jpg'">
     </div>
     <h2>منصة تسجيل العمرة<br><span style="font-size: 14px; color: #666;">Umrah Registration Portal</span></h2>
-    <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
-    <form id="registrationForm" style="display: none;" novalidate>
-        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | نام | نام</span><input type="text" id="name"></div>
+    <form id="registrationForm" novalidate>
+        <div class="form-group"><label>الاسم الكامل</label><span class="lang-sub">Full Name | نام | নাম | नाम</span><input type="text" id="name"></div>
         <div class="form-group"><label>رقم الهوية / الإقامة (10 أرقام)</label><span class="lang-sub">ID Number | شناختی کارڈ | آئی ڈی نمبر | आईडी नंबर</span><input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
         <div class="form-group"><label>رقم الجوال</label><span class="lang-sub">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span><input type="tel" id="phone" placeholder="05XXXXXXXX"></div>
         <div class="form-group"><label>تاريخ الميلاد</label><span class="lang-sub">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span><input type="date" id="birth_date"></div>
@@ -54,10 +53,13 @@
             <span class="lang-sub">Nationality | قومیت | জাতীয়ता | राष्ट्रीयता</span>
             <select id="nationality">
                 <option value="" disabled selected>Select Nationality</option>
+                <option value="Yemeni">Yemeni (يمني)</option>
+                <option value="Egyptian">Egyptian (مصري)</option>
+                <option value="Pakistani">Pakistani (باكستاني)</option>
             </select>
         </div>
 
-        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
+        <div class="form-group" id="imageField"><label>صورة الهوية</label><span class="lang-sub">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span><input type="file" id="id_photo" accept="image/*"></div>
         <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
     </form>
 </div>
@@ -66,7 +68,6 @@
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzjwoiIbWUtteINEK59JFQi6dPIN_OFSj97C0byaLdIal3vMJCSZ_DiBiMmInQbnXN7/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
-    let isLoaded = false;
 
     function showAlert(msg) {
         document.getElementById('alertMessage').innerText = msg;
@@ -76,81 +77,6 @@
     function closeAlert() {
         document.getElementById('customAlert').style.display = 'none';
     }
-
-    // دالة لتوليد الجنسيات الاحتياطية فورا وتخطي التعليق
-    function loadBackupSettings() {
-        if (isLoaded) return;
-        isLoaded = true;
-        document.getElementById('loadingSettings').style.display = 'none';
-        form.style.display = 'block';
-        document.getElementById('femaleOption').style.display = 'block';
-        document.getElementById('imageField').style.display = 'block';
-
-        const natSelect = document.getElementById('nationality');
-        const backupList = ["Yemeni", "Egyptian", "Pakistani"];
-        natSelect.innerHTML = '<option value="" disabled selected>Select Nationality</option>';
-        backupList.forEach(nat => {
-            const option = document.createElement('option');
-            option.value = nat;
-            option.innerText = nat;
-            natSelect.appendChild(option);
-        });
-    }
-
-    // مؤقت ذكي: إذا علق الاتصال لأكثر من 3 ثوانٍ، يتم تشغيل النظام الاحتياطي فوراً وفك التعليق
-    const fallbackTimeout = setTimeout(() => {
-        loadBackupSettings();
-    }, 3000);
-
-    fetch(scriptURL).then(res => res.json()).then(data => {
-        if (isLoaded) return;
-        clearTimeout(fallbackTimeout);
-        isLoaded = true;
-        
-        document.getElementById('loadingSettings').style.display = 'none';
-        
-        if (data.registration_status === "مغلق" || data.Registration_Status === "مغلق") {
-            document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
-            return;
-        }
-        
-        form.style.display = 'block';
-        
-        if (data.female_status === "مفتوح" || data.Female_Status === "مفتوح") {
-            document.getElementById('femaleOption').style.display = 'block';
-        } else {
-            document.getElementById('femaleOption').style.display = 'none';
-        }
-        
-        if (data.image_required === "لا" || data.Image_Required === "لا" || data.image_required === "No") { 
-            document.getElementById('imageField').style.display = 'none'; 
-            isImageRequired = false; 
-        } else {
-            document.getElementById('imageField').style.display = 'block';
-            isImageRequired = true;
-        }
-
-        const natSelect = document.getElementById('nationality');
-        const rawNationalities = data.allowed_nationalities || data.Allowed_Nationalities || data.allowed_nationality;
-        
-        if (rawNationalities && rawNationalities.trim() !== "") {
-            const nationalitiesList = rawNationalities.split(',');
-            natSelect.innerHTML = '<option value="" disabled selected>Select Nationality</option>';
-            nationalitiesList.forEach(nat => {
-                const cleanNat = nat.trim();
-                if(cleanNat !== "") {
-                    const option = document.createElement('option');
-                    option.value = cleanNat;
-                    option.innerText = cleanNat;
-                    natSelect.appendChild(option);
-                }
-            });
-        } else {
-            loadBackupSettings();
-        }
-    }).catch(() => {
-        loadBackupSettings();
-    });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -174,7 +100,7 @@
         }
 
         if (isImageRequired && fileInput.files.length === 0) {
-            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nআইডি फोटो अपलोड करें");
+            showAlert("⚠️ يرجى رفع صورة الهوية!\nPlease upload ID photo!\nتصویر اپ لوڈ کریں\nআইডি ছবি আপলোড করুন\nআইडी फोटो अपलोड करें");
             return;
         }
 
@@ -203,7 +129,7 @@
                         showAlert("✅ تم التسجيل بنجاح!\nRegistration Successful!\nرجسٹریشن کامیاب\nনিবন্ধন সফল\nपंजीकरण सफल");
                         form.reset();
                     } else if (response.result === "duplicate") {
-                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধيت\nयह आईडी पहले से पंजीकृत है");
+                        showAlert("❌ رقم الهوية مسجل مسبقاً!\nID already registered!\nیہ کارڈ پہلے سے رجسٹرڈ ہے\nএই আইডি ইতিমধ্যে নিবন্ধিত\nयह आईडी पहले से पंजीकृत है");
                     }
                 })
                 .catch(() => {
