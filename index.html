@@ -97,7 +97,8 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzFwnTB1B2uuGlNxXG86THVhlAk6BAA8u3NIRsflKYXmwi5YXpcX9pOCRJn8NbWowYf/exec';
+    // تم تحديث الرابط هنا ليكون رابط مشروعك الحالي والصحيح
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzoeXm7mwWx80SY-liZ1Oi_pCnBHS1EWAvLJT9aK7nzZxcaXOwREDM749SsrQ7piA/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
 
@@ -170,7 +171,6 @@
         const natVal = document.getElementById('nationality').value;
         const fileInput = document.getElementById('id_photo');
 
-        // التنبيهات باللغات الخمسة المعتمدة والصحيحة بالكامل
         if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
             showAlert(
                 "⚠️ يرجى تعبئة جميع الحقول المستهدفة!\n" +
@@ -197,7 +197,7 @@
             showAlert(
                 "⚠️ يرجى رفع صورة الهوية أو الإقامة!\n" +
                 "⚠️ Please upload your ID / Iqama photo!\n" +
-                "⚠️ براہ کرم اپنے شناختی کارڈ یا اقامے की तस्वीर अप लोड करें!\n" +
+                "⚠️ براہ کرم اپنے شناختی کارڈ یا اقامے کی تصویر اپ لوڈ کریں!\n" +
                 "⚠️ দয়া করে আপনার আইডি বা ইকামা ছবি আপলোড করুন!\n" +
                 "⚠️ कृपया अपनी आईडी या इकामा की फोटो अपलोड करें!"
             );
