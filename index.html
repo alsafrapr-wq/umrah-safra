@@ -97,7 +97,7 @@
 </div>
 
 <script>
-    // تم تحديث الرابط هنا ليكون رابط مشروعك الحالي والصحيح
+    // تم وضع الرابط الصحيح الذي يتصل بنجاح
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzoeXm7mwWx80SY-liZ1Oi_pCnBHS1EWAvLJT9aK7nzZxcaXOwREDM749SsrQ7piA/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
@@ -172,35 +172,17 @@
         const fileInput = document.getElementById('id_photo');
 
         if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
-            showAlert(
-                "⚠️ يرجى تعبئة جميع الحقول المستهدفة!\n" +
-                "⚠️ Please fill all required fields!\n" +
-                "⚠️ براہ کرم تمام مطلوبہ فیلڈز پُر کریں!\n" +
-                "⚠️ দয়া করে সব প্রয়োজনীয় ঘরগুলি পূরণ করুন!\n" +
-                "⚠️ कृपया सभी आवश्यक फ़ील्ड भरें!"
-            );
+            showAlert("⚠️ يرجى تعبئة جميع الحقول المستهدفة!");
             return;
         }
 
         if (idVal.length !== 10) {
-            showAlert(
-                "⚠️ رقم الهوية أو الإقامة يجب أن يكون مكوناً من 10 أرقام!\n" +
-                "⚠️ ID / Iqama number must be exactly 10 digits!\n" +
-                "⚠️ شناختی کارڈ یا اقامہ نمبر 10 ہندسوں کا ہونا ضروری ہے!\n" +
-                "⚠️ আইডি বা ইকামা নম্বর অবশ্যই ১০ ডিজিটের হতে হবে!\n" +
-                "⚠️ आईडी या इकामा संख्या 10 अंकों की होनी चाहिए!"
-            );
+            showAlert("⚠️ رقم الهوية أو الإقامة يجب أن يكون مكوناً من 10 أرقام!");
             return;
         }
 
         if (isImageRequired && fileInput.files.length === 0) {
-            showAlert(
-                "⚠️ يرجى رفع صورة الهوية أو الإقامة!\n" +
-                "⚠️ Please upload your ID / Iqama photo!\n" +
-                "⚠️ براہ کرم اپنے شناختی کارڈ یا اقامے کی تصویر اپ لوڈ کریں!\n" +
-                "⚠️ দয়া করে আপনার আইডি বা ইকামা ছবি আপলোড করুন!\n" +
-                "⚠️ कृपया अपनी आईडी या इकामा की फोटो अपलोड करें!"
-            );
+            showAlert("⚠️ يرجى رفع صورة الهوية أو الإقامة!");
             return;
         }
 
@@ -225,29 +207,21 @@
                 .then(response => {
                     btn.disabled = false;
                     btn.innerText = "تأكيد التسجيل (Submit)";
+                    
                     if (response.result === "success") {
-                        showAlert(
-                            "✅ تم التسجيل بنجاح!\n" +
-                            "✅ Registration completed successfully!\n" +
-                            "✅ رجسٹریشن کامیابی کے ساتھ مکمل ہو گئی ہے!\n" +
-                            "✅ নিবন্ধন সফলভাবে সম্পন্ন হয়েছে!\n" +
-                            "✅ पंजीकरण सफलतापूर्वक पूरा हो गया है!"
-                        );
+                        showAlert("✅ تم التسجيل بنجاح!");
                         form.reset();
                     } else if (response.result === "duplicate") {
-                        showAlert(
-                            "❌ رقم الهوية مسجل مسبقاً في النظام!\n" +
-                            "❌ This ID number is already registered!\n" +
-                            "❌ یہ شناختی کارڈ نمبر پہلے سے رجسٹرڈ ہے!\n" +
-                            "❌ এই আইডি নম্বরটি ইতিমধ্যে নিবন্ধিত হয়েছে!\n" +
-                            "❌ यह आईडी नंबर पहले से पंजीकृत है!"
-                        );
+                        showAlert("❌ رقم الهوية مسجل مسبقاً في النظام!");
+                    } else {
+                        // هذا السطر سيفضح أي خطأ يحدث داخل سكريبت جوجل
+                        showAlert("❌ رسالة خطأ من جوجل: " + (response.message || JSON.stringify(response)));
                     }
                 })
-                .catch(() => {
+                .catch((error) => {
                     btn.disabled = false;
                     btn.innerText = "تأكيد التسجيل (Submit)";
-                    showAlert("❌ Connection Error / خطأ في الاتصال");
+                    showAlert("❌ خطأ في الإرسال: \n" + error.message);
                 });
         };
 
