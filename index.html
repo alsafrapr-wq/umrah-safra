@@ -1,117 +1,242 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="notranslate" translate="no">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نموذج التسجيل</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل العمرة - Umrah Registration Portal</title>
+    <style>
+        :root { --primary-color: #008967; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 550px; border-top: 8px solid var(--primary-color); }
+        .logo-container { text-align: center; margin-bottom: 20px; }
+        .logo { max-width: 100%; height: auto; max-height: 120px; border-radius: 10px; }
+        h2 { text-align: center; color: #333; line-height: 1.6; margin-top: 0; }
+        .form-group { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
+        .lang-sub { display: block; font-size: 12px; color: #666; margin-bottom: 5px; line-height: 1.5; font-weight: normal; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* استخدام pre-line يسمح بعرض الأسطر المتعددة بشكل صحيح */
+        .modal-msg { font-size: 15px; color: #333; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; font-weight: 500; text-align: center; }
+        .modal-btn { background: var(--primary-color); color: white; border: none; padding: 12px 40px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        
+        #femaleOption { display: none; }
+        .loading-overlay { text-align: center; padding: 20px; color: var(--primary-color); font-weight: bold; }
+    </style>
 </head>
 <body>
 
-  <select id="langSelect" style="margin-bottom: 20px;">
-    <option value="ar">العربية</option>
-    <option value="en">English</option>
-    <option value="ur">اردو</option>
-    <option value="bn">বাংলা</option>
-    <option value="hi">हिंदी</option>
-  </select>
-
-  <form id="registrationForm">
-    
-    <div style="margin-bottom: 15px;">
-      <label>الاسم الكامل | Full Name | نام | নাম | पूरा नाम | English</label>
-      <br>
-      <input type="text" name="name" required style="width: 100%; padding: 8px;">
+<div class="modal-overlay" id="customAlert">
+    <div class="modal-box">
+        <div class="modal-msg" id="alertMessage"></div>
+        <button class="modal-btn" onclick="closeAlert()">موافق / OK</button>
     </div>
+</div>
 
-    <div style="margin-bottom: 15px;">
-      <label>رقم الهوية أو الإقامة | ID / Iqama Number</label>
-      <br>
-      <input type="number" name="id_number" required style="width: 100%; padding: 8px;">
+<div class="container" id="mainContainer">
+    <div class="logo-container">
+        <img src="logo.jpg" alt="Logo" class="logo" onerror="this.src='logo.jpg.jpg'">
     </div>
+    <h2>منصة تسجيل العمرة<br><span style="font-size: 14px; color: #666;">Umrah Registration Portal</span></h2>
+    <div id="loadingSettings" class="loading-overlay">جاري التحميل... (Loading)</div>
 
-    <div style="margin-bottom: 15px;">
-      <label>رقم الجوال | Phone Number</label>
-      <br>
-      <input type="tel" name="phone" required style="width: 100%; padding: 8px;">
-    </div>
+    <form id="registrationForm" style="display: none;" novalidate>
+        <div class="form-group">
+            <label>الاسم الكامل</label>
+            <span class="lang-sub" translate="no">Full Name | نام | নাম | पूरा नाम</span>
+            <input type="text" id="name">
+        </div>
+        
+        <div class="form-group">
+            <label>رقم الهوية / الإقامة (10 أرقام)</label>
+            <span class="lang-sub" translate="no">ID Number | شناختی کارڈ | آئی ڈی نمبر | आई डी नंबर</span>
+            <input type="tel" id="id_number" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        </div>
+        
+        <div class="form-group">
+            <label>رقم الجوال</label>
+            <span class="lang-sub" translate="no">Mobile | موبائل نمبر | মোবাইল নম্বর | मोबाइल नंबर</span>
+            <input type="tel" id="phone" placeholder="05XXXXXXXX">
+        </div>
+        
+        <div class="form-group">
+            <label>تاريخ الميلاد</label>
+            <span class="lang-sub" translate="no">Birth Date | تاریخ پیدائش | জন্ম তারিখ | जन्म तिथि</span>
+            <input type="date" id="birth_date">
+        </div>
+        
+        <div class="form-group">
+            <label>الجنس</label>
+            <span class="lang-sub" translate="no">Gender | جنس | লিঙ্গ | लिंग</span>
+            <select id="gender">
+                <option value="" disabled selected>اختر (Select)</option>
+                <option value="ذكر">ذكر (Male)</option>
+                <option value="أنثى" id="femaleOption">أنثى (Female)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>الجنسية</label>
+            <span class="lang-sub" translate="no">Nationality | قومیت | জাতীয়তা | राष्ट्रीयता</span>
+            <select id="nationality">
+                <option value="" disabled selected>Select Nationality</option>
+            </select>
+        </div>
 
-    <div style="margin-bottom: 15px;">
-      <label>إرفاق صورة الهوية | Upload ID Photo</label>
-      <br>
-      <input type="file" id="id_photo" accept="image/*" style="width: 100%; padding: 8px;">
-    </div>
+        <div class="form-group" id="imageField">
+            <label>صورة الهوية</label>
+            <span class="lang-sub" translate="no">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span>
+            <input type="file" id="id_photo" accept="image/*">
+        </div>
+        
+        <button type="submit" id="submitBtn">تأكيد التسجيل (Submit)</button>
+    </form>
+</div>
 
-    <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">
-      إرسال | Submit
-    </button>
-  </form>
-
-  <script>
-    // رابط السكريبت الخاص بك
+<script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbz2_oqB7hAiSUYTdShJuP81Wv8joxr4sDjUdaLiyngt7TvZZe3GqpQx15n_X5lnerp-/exec';
     const form = document.getElementById('registrationForm');
+    let isImageRequired = true;
 
-    // نصوص التنبيهات باللغات الخمس
-    const alertTexts = {
-      ar: { wait: "جاري الإرسال...", success: "تم التسجيل بنجاح!", duplicate: "رقم الهوية أو الإقامة مسجل مسبقاً!", error: "حدث خطأ أثناء التسجيل، حاول مجدداً." },
-      en: { wait: "Sending...", success: "Registration successful!", duplicate: "This ID/Iqama is already registered!", error: "An error occurred, please try again." },
-      ur: { wait: "بھیجا جا رہا ہے...", success: "رجسٹریشن کامیابی سے مکمل ہو گئی!", duplicate: "یہ شناختی کارڈ یا اقامہ نمبر پہلے سے رجسٹرڈ ہے!", error: "ایک خرابی پیش آ گئی، براہ کرم دوبارہ کوشش کریں۔" },
-      bn: { wait: "পাঠানো হচ্ছে...", success: "নিবন্ধন সফলভাবে সম্পন্ন হয়েছে!", duplicate: "এই আইডি বা আকামা নম্বর ইতিমধ্যে নিবন্ধিত!", error: "একটি ত্রুটি ঘটেছে, অনুগ্রহ করে আবার চেষ্টা করুন।" },
-      hi: { wait: "भेजा जा रहा है...", success: "पंजीकरण सफलतापूर्वक पूरा हुआ!", duplicate: "यह आईडी या इकामा नंबर पहले से पंजीकृत है!", error: "एक त्रुटि हुई, कृपया पुनः प्रयास करें।" }
-    };
+    function showAlert(msg) {
+        document.getElementById('alertMessage').innerText = msg;
+        document.getElementById('customAlert').style.display = 'flex';
+    }
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      
-      // تحديد اللغة الحالية المختارة
-      const userLang = document.getElementById('langSelect').value || 'ar';
-      const texts = alertTexts[userLang] || alertTexts['ar'];
+    function closeAlert() {
+        document.getElementById('customAlert').style.display = 'none';
+    }
 
-      // إظهار رسالة "جاري الإرسال"
-      Swal.fire({
-        title: texts.wait,
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-      });
+    fetch(scriptURL)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('loadingSettings').style.display = 'none';
+        
+        const regStatus = data.Registration_Status || data.registration_status || "";
+        if (regStatus === "مغلق") {
+            document.getElementById('mainContainer').innerHTML = "<h3 style='text-align:center;'>التسجيل مغلق حالياً<br>Registration is closed</h3>";
+            return;
+        }
+        
+        form.style.display = 'block';
+        
+        const femaleStatus = data.Female_Status || data.female_status || "";
+        if (femaleStatus === "مفتوح") {
+            document.getElementById('femaleOption').style.display = 'block';
+        } else {
+            document.getElementById('femaleOption').style.display = 'none';
+        }
+        
+        const imgRequired = data.Image_Required || data.image_required || "";
+        if (imgRequired === "لا" || imgRequired === "No") { 
+            document.getElementById('imageField').style.display = 'none'; 
+            isImageRequired = false; 
+        } else {
+            document.getElementById('imageField').style.display = 'block';
+            isImageRequired = true;
+        }
 
-      const formData = new FormData(form);
-      const fileInput = document.getElementById('id_photo');
-
-      const sendData = (dataToSend) => {
-        fetch(scriptURL, { method: 'POST', body: dataToSend })
-          .then(response => response.json())
-          .then(data => {
-            if (data.result === 'success') {
-              Swal.fire({ title: texts.success, icon: 'success' });
-              form.reset(); // تفريغ الحقول بعد النجاح
-            } else if (data.result === 'duplicate') {
-              Swal.fire({ title: texts.duplicate, icon: 'error' });
-            } else {
-              Swal.fire({ title: texts.error, text: data.message, icon: 'error' });
-            }
-          })
-          .catch(error => {
-            Swal.fire({ title: texts.error, icon: 'error' });
-          });
-      };
-
-      // تحويل الصورة إلى Base64 وإرسالها إن وُجدت
-      if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function() {
-          // إضافة بيانات الصورة إلى حقول النموذج المرسلة
-          formData.append('id_photo', reader.result);
-          formData.append('id_photo_type', file.type);
-          sendData(formData);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // في حال عدم إرفاق صورة
-        sendData(formData);
-      }
+        const natSelect = document.getElementById('nationality');
+        const rawNationalities = data.allowed_nationalities || data.Allowed_Nationalities || data.allowed_nationality;
+        
+        if (rawNationalities && rawNationalities.trim() !== "") {
+            const nationalitiesList = rawNationalities.split(',');
+            nationalitiesList.forEach(nat => {
+                const cleanNat = nat.trim();
+                if(cleanNat !== "") {
+                    const option = document.createElement('option');
+                    option.value = cleanNat;
+                    option.innerText = cleanNat;
+                    natSelect.appendChild(option);
+                }
+            });
+        }
+    }).catch((err) => {
+        console.error(err);
+        document.getElementById('loadingSettings').innerText = "خطأ في الاتصال بالسيرفر...";
     });
-  </script>
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nameVal = document.getElementById('name').value.trim();
+        const idVal = document.getElementById('id_number').value.trim();
+        const phoneVal = document.getElementById('phone').value.trim();
+        const birthVal = document.getElementById('birth_date').value.trim();
+        const genderVal = document.getElementById('gender').value;
+        const natVal = document.getElementById('nationality').value;
+        const fileInput = document.getElementById('id_photo');
+
+        // رسالة نقص البيانات باللغات الخمس
+        if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
+            showAlert("⚠️ يرجى تعبئة جميع الحقول المطلوبة!\n⚠️ Please fill all required fields!\n⚠️ براہ کرم تمام مطلوبہ فیلڈز پر کریں!\n⚠️ সমস্ত প্রয়োজনীয় ক্ষেত্র পূরণ করুন!\n⚠️ कृपया सभी आवश्यक फ़ील्ड भरें!");
+            return;
+        }
+
+        // رسالة خطأ طول الهوية باللغات الخمس
+        if (idVal.length !== 10) {
+            showAlert("⚠️ رقم الهوية أو الإقامة يجب أن يكون مكوناً من 10 أرقام!\n⚠️ ID/Iqama must be 10 digits!\n⚠️ شناختی کارڈ 10 ہندسوں کا ہونا چاہیے!\n⚠️ আইডি 10 সংখ্যার হতে হবে!\n⚠️ आईडी 10 अंकों की होनी चाहिए!");
+            return;
+        }
+
+        // رسالة نقص الصورة باللغات الخمس
+        if (isImageRequired && fileInput.files.length === 0) {
+            showAlert("⚠️ يرجى رفع صورة الهوية أو الإقامة!\n⚠️ Please upload ID/Iqama photo!\n⚠️ براہ کرم شناختی کارڈ کی تصویر اپ لوڈ کریں!\n⚠️ আইডি ছবি আপলোড করুন!\n⚠️ कृपया आईडी फोटो अपलोड करें!");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "جاري المعالجة... / Processing...";
+
+        const sendData = (base64 = "", type = "") => {
+            const body = new URLSearchParams({
+                name: nameVal,
+                id_number: idVal,
+                phone: phoneVal,
+                birth_date: birthVal,
+                gender: genderVal,
+                nationality: natVal,
+                id_photo: base64,
+                id_photo_type: type
+            });
+
+            fetch(scriptURL, { method: 'POST', body: body })
+                .then(res => res.json())
+                .then(response => {
+                    btn.disabled = false;
+                    btn.innerText = "تأكيد التسجيل (Submit)";
+                    
+                    if (response.result === "success") {
+                        // رسالة النجاح باللغات الخمس
+                        showAlert("✅ تم التسجيل بنجاح!\n✅ Registration successful!\n✅ رجسٹریشن کامیابی سے مکمل ہو گئی!\n✅ নিবন্ধন সফলভাবে সম্পন্ন হয়েছে!\n✅ पंजीकरण सफलतापूर्वक पूरा हुआ!");
+                        form.reset();
+                    } else if (response.result === "duplicate") {
+                        // رسالة التكرار باللغات الخمس
+                        showAlert("❌ رقم الهوية مسجل مسبقاً في النظام!\n❌ This ID/Iqama is already registered!\n❌ یہ شناختی کارڈ پہلے سے رجسٹرڈ ہے!\n❌ এই আইডি ইতিমধ্যে নিবন্ধিত!\n❌ यह आईडी पहले से पंजीकृत है!");
+                    } else {
+                        showAlert("❌ خطأ / Error : " + (response.message || JSON.stringify(response)));
+                    }
+                })
+                .catch((error) => {
+                    btn.disabled = false;
+                    btn.innerText = "تأكيد التسجيل (Submit)";
+                    showAlert("❌ خطأ في الإرسال / Connection Error");
+                });
+        };
+
+        if (fileInput.files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = (ev) => sendData(ev.target.result, fileInput.files[0].type);
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            sendData();
+        }
+    });
+</script>
 </body>
 </html>
