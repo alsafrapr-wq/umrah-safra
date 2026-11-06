@@ -20,7 +20,6 @@
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        /* استخدام pre-line يسمح بعرض الأسطر المتعددة بشكل صحيح */
         .modal-msg { font-size: 15px; color: #333; margin-bottom: 20px; white-space: pre-line; line-height: 1.6; font-weight: 500; text-align: center; }
         .modal-btn { background: var(--primary-color); color: white; border: none; padding: 12px 40px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
         
@@ -89,7 +88,7 @@
 
         <div class="form-group" id="imageField">
             <label>صورة الهوية</label>
-            <span class="lang-sub" translate="no">ID Photo | تصویر | আইডি ছবি | আইডি फोटो</span>
+            <span class="lang-sub" translate="no">ID Photo | تصویر | আইডি ছবি | आईडी फोटो</span>
             <input type="file" id="id_photo" accept="image/*">
         </div>
         
@@ -98,7 +97,8 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz2_oqB7hAiSUYTdShJuP81Wv8joxr4sDjUdaLiyngt7TvZZe3GqpQx15n_X5lnerp-/exec';
+    // تم تحديث الرابط أدناه بالرابط الجديد والمحدث للسكربت
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyDVoO7NpIps44hiAUd-PKy6ZpnXucu19c16ljb-WPqlmQ4apU-YmcR0syXj4HJA6y-/exec';
     const form = document.getElementById('registrationForm');
     let isImageRequired = true;
 
@@ -171,19 +171,16 @@
         const natVal = document.getElementById('nationality').value;
         const fileInput = document.getElementById('id_photo');
 
-        // رسالة نقص البيانات باللغات الخمس
         if (!nameVal || !idVal || !phoneVal || !birthVal || !genderVal || !natVal) {
             showAlert("⚠️ يرجى تعبئة جميع الحقول المطلوبة!\n⚠️ Please fill all required fields!\n⚠️ براہ کرم تمام مطلوبہ فیلڈز پر کریں!\n⚠️ সমস্ত প্রয়োজনীয় ক্ষেত্র পূরণ করুন!\n⚠️ कृपया सभी आवश्यक फ़ील्ड भरें!");
             return;
         }
 
-        // رسالة خطأ طول الهوية باللغات الخمس
         if (idVal.length !== 10) {
             showAlert("⚠️ رقم الهوية أو الإقامة يجب أن يكون مكوناً من 10 أرقام!\n⚠️ ID/Iqama must be 10 digits!\n⚠️ شناختی کارڈ 10 ہندسوں کا ہونا چاہیے!\n⚠️ আইডি 10 সংখ্যার হতে হবে!\n⚠️ आईडी 10 अंकों की होनी चाहिए!");
             return;
         }
 
-        // رسالة نقص الصورة باللغات الخمس
         if (isImageRequired && fileInput.files.length === 0) {
             showAlert("⚠️ يرجى رفع صورة الهوية أو الإقامة!\n⚠️ Please upload ID/Iqama photo!\n⚠️ براہ کرم شناختی کارڈ کی تصویر اپ لوڈ کریں!\n⚠️ আইডি ছবি আপলোড করুন!\n⚠️ कृपया आईडी फोटो अपलोड करें!");
             return;
@@ -212,11 +209,9 @@
                     btn.innerText = "تأكيد التسجيل (Submit)";
                     
                     if (response.result === "success") {
-                        // رسالة النجاح باللغات الخمس
                         showAlert("✅ تم التسجيل بنجاح!\n✅ Registration successful!\n✅ رجسٹریشن کامیابی سے مکمل ہو گئی!\n✅ নিবন্ধন সফলভাবে সম্পন্ন হয়েছে!\n✅ पंजीकरण सफलतापूर्वक पूरा हुआ!");
                         form.reset();
                     } else if (response.result === "duplicate") {
-                        // رسالة التكرار باللغات الخمس
                         showAlert("❌ رقم الهوية مسجل مسبقاً في النظام!\n❌ This ID/Iqama is already registered!\n❌ یہ شناختی کارڈ پہلے سے رجسٹرڈ ہے!\n❌ এই আইডি ইতিমধ্যে নিবন্ধিত!\n❌ यह आईडी पहले से पंजीकृत है!");
                     } else {
                         showAlert("❌ خطأ / Error : " + (response.message || JSON.stringify(response)));
